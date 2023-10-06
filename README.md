@@ -87,4 +87,4 @@ Policies we created/modified as additional benchmarks were:
 
 * Wrappers from [ikostrikov/jaxrl](https://github.com/ikostrikov/jaxrl)
 * Distributional RL from [google-deepmind/acme](https://github.com/google-deepmind/acme)
-* Control flow from [yifan12wu/td3-jax]([td3-jax](https://github.com/yifan12wu/td3-jax)
+* Control flow from [yifan12wu/td3-jax](https://github.com/yifan12wu/td3-jax)
