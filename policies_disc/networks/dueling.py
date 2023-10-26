@@ -4,7 +4,7 @@ from jax import nn
 from policies_disc.networks.network import Network
 
 
-class Duelling(Network):
+class Dueling(Network):
     def __call__(self, state):
         info = {}
         x             = state

@@ -48,3 +48,30 @@ class DDQN(DQN):
             'online_Q_std' : online_Q.std(),
         }
         return loss_mean, aux
+
+
+    def _td_loss(self, state, batch, seed):
+        state        = jax.lax.stop_gradient(state)
+        seed1, seed2 = jax.random.split(seed)
+
+        logits      = self.network_model_apply(state.network.params, state.network.sn_state, seed1, batch['next_obs'])[0].pop('q')
+        next_action = logits.argmax(-1)
+
+        target_info = self.network_model_apply(state.target.network, state.network.sn_state, seed1, batch['next_obs'])[0]
+        target_Q    = target_info.pop('q')
+        target_Q    = target_Q[self.index, next_action]
+        discount    = self.args.discount ** self.args.nstep
+        done        = 1. - batch['done'].squeeze()
+        target_Q    = done * discount * target_Q
+        target_Q    = batch['rew'].squeeze() + target_Q
+
+        online_info, sn_state = self.network_model_apply(self.network.params, state.network.sn_state, seed2, batch['obs'], update_stats=True)
+        online_Q              = online_info.pop('q')
+        action                = batch['act'].squeeze().astype(int)
+        online_Q              = online_Q[self.td_index, action]
+
+        aux = {
+            'target_Q': target_Q,
+            'online_Q': online_Q,
+        }
+        return aux

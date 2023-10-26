@@ -33,9 +33,14 @@ class DoubleGum(DDPG):
 
         actor_info     = self.actor_model_apply(state.target.actor, state.actor.sn_state, seed1, batch['next_obs'], self.args.critic_noise, .3)[0]
         next_action    = actor_info['action']
+        # next_log_prob  = actor_info['log_prob']
         target_info    = self.critic_model_apply(state.target.critic, state.critic.sn_state, seed2, batch['next_obs'], next_action)[0]
         target_Q       = target_info.pop('value').mean(0)
-        target_std     = target_info.pop('std')
+        target_std     = target_info.pop('std').mean(0)
+
+        # target_Q      -= self.args.alpha * next_log_prob
+        # target_Q      -= target_spread * next_log_prob
+        target_Q += self.args.c * target_std
 
         discount = self.args.discount ** self.args.nstep
         done     = 1. - batch['done']
@@ -49,7 +54,7 @@ class DoubleGum(DDPG):
         # beta-nll, std network
         std_sg      = jax.lax.stop_gradient(online_std)
         td_loss     = online_Q - target_Q
-        critic_loss = jnp.log(online_std) + .5 * (td_loss / online_std + self.args.c) ** 2.
+        critic_loss = jnp.log(online_std) + .5 * (td_loss / online_std) ** 2.
         critic_loss = std_sg * critic_loss
 
         critic_loss_mean = critic_loss.mean()
@@ -64,9 +69,6 @@ class DoubleGum(DDPG):
 
             'online_std'     : online_std.mean(),
             'target_std'     : target_std.mean(),
-
-            'norm_td'        : jnp.mean(td_loss / online_std),
-            'exponent'       : jnp.mean(td_loss / online_std - self.args.c),
         }
         return critic_loss_mean, aux
 
@@ -74,9 +76,11 @@ class DoubleGum(DDPG):
     def _td_loss(self, state, batch, seed):
         seed1, seed2, seed3, seed4 = jax.random.split(seed, num=4)
 
-        next_action   = self.actor_model_apply(state.actor.params, state.actor.sn_state, seed1, batch['next_obs'], self.args.critic_noise, .3)[0]['action']
-        target_info   = self.critic_model_apply(state.target.critic, state.critic.sn_state, seed2, batch['next_obs'], next_action)[0]
-        target_Q      = target_info.pop('value').mean(0)
+        next_action = self.actor_model_apply(state.actor.params, state.actor.sn_state, seed1, batch['next_obs'], self.args.critic_noise, .3)[0]['action']
+        target_info = self.critic_model_apply(state.target.critic, state.critic.sn_state, seed2, batch['next_obs'], next_action)[0]
+        target_Q    = target_info.pop('value').mean(0)
+        target_std  = target_info.pop('std').mean(0)
+        target_Q   += self.args.c * target_std
 
         discount = self.args.discount ** self.args.nstep
         done     = 1. - batch['done']

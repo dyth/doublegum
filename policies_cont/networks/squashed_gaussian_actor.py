@@ -1,5 +1,4 @@
 import haiku as hk
-import jax
 from jax import nn
 from jax import numpy as jnp
 
@@ -36,11 +35,11 @@ class SquashedGaussianActor(hk.Module):
         mu          = hk.Linear(self.action_dim, w_init=self.out_init, name='mu')(x)
         std         = hk.Linear(self.action_dim, w_init=self.out_init, name='std')(x)
         # std         = .1 * jnp.ones(log_std.shape)                                                   # fixed std
-        # std         = jnp.exp(jnp.clip(std, LOG_STD_MIN, LOG_STD_MAX))                               # clipped
+        std         = jnp.exp(jnp.clip(std, LOG_STD_MIN, LOG_STD_MAX))                               # clipped
         # std         = jnp.exp(jnp.clip(std, jnp.exp(LOG_STD_MIN), jnp.exp(LOG_STD_MAX)))             # clipped
         # std         = jnp.exp(LOG_STD_MIN + .5 * (LOG_STD_MAX - LOG_STD_MIN) * (1 + nn.tanh(std)))   # smooth clipping
         # std         = nn.softplus(std) + 1e-6                                                        # softplus
-        std         = self.std
+        # std         = self.std
         # info['mu']  = 2. * nn.tanh(mu)
         info['mu']  = mu
         info['std'] = std

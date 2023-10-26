@@ -29,6 +29,7 @@ class DQN:
         target_state  = self.initialize_target(network_state)
         self.state    = State(network_state, target_state)
         self.index    = jnp.arange(self.args.batch_size)
+        self.td_index = jnp.arange(1000)
         self.jit()
 
     def initialize_network(self):
@@ -51,9 +52,11 @@ class DQN:
         if self.args.jit:
             self.network = jax.jit(self._network)
             self.step    = jax.jit(self._step)
+            self.td_loss = jax.jit(self._td_loss)
         else:
             self.network = self._network
             self.step    = self._step
+            self.td_loss = self._td_loss
 
 
     def network_model_apply(self, params, sn_state, seed, state, update_stats=False):
@@ -164,3 +167,30 @@ class DQN:
         replay_samples           = replay_buffer.sample(samples)
         network_info, self.state = self.step(replay_samples, self.rngs.get_key(), self.state)
         return network_info
+
+
+    def _td_loss(self, state, batch, seed):
+        state        = jax.lax.stop_gradient(state)
+        seed1, seed2 = jax.random.split(seed)
+
+        target_info = self.network_model_apply(state.target.network, state.network.sn_state, seed1, batch['next_obs'])[0]
+        target_Q    = target_info.pop('q')
+        target_Q    = target_Q.max(-1)
+        discount    = self.args.discount ** self.args.nstep
+        done        = 1. - batch['done'].squeeze()
+        target_Q    = done * discount * target_Q
+        target_Q    = batch['rew'].squeeze() + target_Q
+
+        online_info, sn_state = self.network_model_apply(state.network.params, state.network.sn_state, seed2, batch['obs'], update_stats=True)
+        online_Q              = online_info.pop('q')
+        action                = batch['act'].squeeze().astype(int)
+        online_Q              = online_Q[self.td_index, action]
+
+        aux = {
+            'target_Q': target_Q,
+            'online_Q': online_Q,
+        }
+        return aux
+
+    def log_td_loss(self, replay_buffer, samples=1000):
+        return self.td_loss(self.state, replay_buffer.sample(samples), self.rngs.get_key())
