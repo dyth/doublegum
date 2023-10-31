@@ -2,6 +2,11 @@
 
 Code for *Double Gumbel Q-Learning*
 
+Data (5.4 MB): [https://drive.google.com/file/d/12wyYZ92bvVdkEQIHms8mVR5zYJZue-cd/view?usp=sharing]()
+
+Logs (4.21 GB): [https://drive.google.com/file/d/1LpR3lrKUx-qTaCrI4YViAjc0QA5kb8P2/view?usp=sharing]()
+
+
 ## Installation
 
 On `Python 3.9` with `Cuda 12.2.1` and `cudnn 8.8.0`.
@@ -41,6 +46,7 @@ test that the code runs
 ./test.sh
 ```
 
+
 ## Continuous Control
 
 ```commandline
@@ -67,6 +73,7 @@ Policies included in this repository but not benchmarked in our paper were:
 * `IQL`: Implicit Q-Learning adapted to an online setting, [[Kostrikov et al., 2022](https://openreview.net/forum?id=68n2s9ZJWF8)]
 * `SACLite`: SAC without the entropy term on the critic, [[Yu et al., 2022](https://arxiv.org/abs/2201.12434)]
 
+
 ## Discrete Control
 
 ```commandline
@@ -81,6 +88,18 @@ Policies benchmarked in our paper were:
 
 Policies we created/modified as additional benchmarks were:
 * `DuellingDDQN`: DuellingDDQN (Duelling Double DQN)
+
+
+## Graphs and Tables
+
+Reproduced using raw data from `Data` and `Logs`.
+`Logs` (4.21 GB) contains data for Section 4 (Figures 1 and 2) and Appendix E.2 (Figures 6 and 7), while `Data` (5.4 MB) contains benchmark results for DoubleGum and baselines used in all other graphs, results and tables.
+
+Ran by
+```commandline
+python plotting/fig<x>.py
+python tables/tab<x>.py
+```
 
 
 ## Acknowledgements
