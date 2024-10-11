@@ -2,9 +2,9 @@
 
 Code for *Double Gumbel Q-Learning*
 
-Data (5.4 MB): [https://drive.google.com/file/d/12wyYZ92bvVdkEQIHms8mVR5zYJZue-cd/view?usp=sharing]()
+Data (5.4 MB): [https://drive.google.com/file/d/12wyYZ92bvVdkEQIHms8mVR5zYJZue-cd/view?usp=sharing](https://drive.google.com/file/d/12wyYZ92bvVdkEQIHms8mVR5zYJZue-cd/view?usp=sharing)
 
-Logs (4.21 GB): [https://drive.google.com/file/d/1LpR3lrKUx-qTaCrI4YViAjc0QA5kb8P2/view?usp=sharing]()
+Logs (4.21 GB): [https://drive.google.com/file/d/1LpR3lrKUx-qTaCrI4YViAjc0QA5kb8P2/view?usp=sharing](https://drive.google.com/file/d/1LpR3lrKUx-qTaCrI4YViAjc0QA5kb8P2/view?usp=sharing)
 
 
 ## Installation
